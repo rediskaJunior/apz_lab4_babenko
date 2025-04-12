@@ -2,23 +2,23 @@ syntax = "proto3";
 
 package logging;
 
-service LoggingService {
-    rpc LogMessage (LogRequest) returns (LogResponse);
-    rpc GetMessages (GetRequest) returns (GetResponse);
-}
-
 message LogRequest {
-    string uuid = 1;
-    string message = 2;
+  string uuid = 1;
+  string message = 2;
 }
 
 message LogResponse {
-    bool success = 1;
-    string message = 2;  // ✅ Make sure this field exists
+  bool success = 1;
+  string message = 2;
 }
 
 message GetRequest {}
 
 message GetResponse {
-    repeated string messages = 1;
+  repeated string messages = 1;
+}
+
+service LoggingService {
+  rpc LogMessage(LogRequest) returns (LogResponse);
+  rpc GetMessages(GetRequest) returns (GetResponse);
 }

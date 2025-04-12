@@ -14,16 +14,15 @@ logger = logging.getLogger(__name__)
 
 class LoggingService(logging_pb2_grpc.LoggingServiceServicer):
     def __init__(self, hazelcast_client):
-        self.hazelcast_map = hazelcast_client.get_map("messages").blocking()
+        self.queue = hazelcast_client.get_queue("messages-queue").blocking()
     
     def LogMessage(self, request, context):
-        self.hazelcast_map.put(request.uuid, request.message)
-        logger.info(f"Saved message: {request.uuid} -> {request.message}")
-        return logging_pb2.LogResponse(success=True, message=f"Saved message with UUID: {request.uuid}")
+        self.queue.offer(f"{request.uuid}:{request.message}")
+        logger.info(f"Queued message: {request.uuid} -> {request.message}")
+        return logging_pb2.LogResponse(success=True, message=f"Queued message with UUID: {request.uuid}")
 
     def GetMessages(self, request, context):
-        messages = [str(v) for v in self.hazelcast_map.values()]
-        return logging_pb2.GetResponse(messages=messages)
+        return logging_pb2.GetResponse(messages=[])
 
 def serve(port):
     hazelcast_client = hazelcast.HazelcastClient()

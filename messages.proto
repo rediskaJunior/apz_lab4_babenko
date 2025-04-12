@@ -1,13 +1,18 @@
 syntax = "proto3";
 
-package logging;
-
-service MessageService {
-    rpc GetStaticMessage (EmptyRequest) returns (MessageResponse);
-}
+package messages;
 
 message EmptyRequest {}
 
 message MessageResponse {
-    string message = 1;
+  string message = 1;
+}
+
+message MessageList {
+  repeated string messages = 1;
+}
+
+service MessageService {
+  rpc GetStaticMessage(EmptyRequest) returns (MessageResponse);
+  rpc GetAllMessages(EmptyRequest) returns (MessageList);
 }

@@ -14,6 +14,7 @@ import messages_pb2
 import messages_pb2_grpc
 import requests
 import sys
+from flask import Flask, request, jsonify
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,27 +37,26 @@ def get_ports_from_config(config_url):
 
 def get_messages_stub():
     config_url = f'http://localhost:{sys.argv[1]}/get_ports'
-    logging_ports, message_port = get_ports_from_config(config_url)
-    if not message_port:
-        context.set_code(grpc.StatusCode.UNAVAILABLE)
-        context.set_details("No available messages services.")
+    _, message_ports = get_ports_from_config(config_url)
+    if not message_ports:
         return None
-            
-    try:
-        channel = grpc.insecure_channel(f'localhost:{message_port}')
-        grpc.channel_ready_future(channel).result(timeout=1)
-        stub = messages_pb2_grpc.MessageServiceStub(channel)
-        return stub
-    except Exception as e:
-        logger.error(f"Failed to connect to messages service on port {message_port}: {e}")
-        return None
+
+    random.shuffle(message_ports)
+    for port in message_ports:
+        try:
+            channel = grpc.insecure_channel(f'localhost:{port}')
+            grpc.channel_ready_future(channel).result(timeout=1)
+            stub = messages_pb2_grpc.MessageServiceStub(channel)
+            return stub
+        except Exception as e:
+            logger.error(f"Failed to connect to message service on port {port}: {e}")
+    return None
 
 def get_logging_stub():
     config_url = f'http://localhost:{sys.argv[1]}/get_ports'
     logging_ports, message_port = get_ports_from_config(config_url)
     if not logging_ports:
-        context.set_code(grpc.StatusCode.UNAVAILABLE)
-        context.set_details("No available logging services.")
+        logger.warning("No available message service instances found.")
         return None
             
     random.shuffle(logging_ports)
@@ -117,6 +117,47 @@ class FacadeService(facade_pb2_grpc.FacadeServiceServicer):
             context.set_details("Failed to fetch messages.")
             return facade_pb2.GetResponse(messages=[])
 
+def ShowMessages(self, request, context):
+    logging_stub = get_logging_stub()
+    if not logging_stub:
+        logger.error("No available logging services.")
+
+    messages_stub = get_messages_stub()
+    if not messages_stub:
+        logger.error("No available messages services.")
+
+    try:
+        log_response = []
+        if logging_stub:
+            log_response = logging_stub.GetMessages(logging_pb2.GetRequest()).messages
+            logger.info(f"Received from logging service: {log_response}")
+
+        message_response = ""
+        if messages_stub:
+            message_response = messages_stub.GetStaticMessage(messages_pb2.EmptyRequest()).message
+            logger.info(f"Received from messages service: {message_response}")
+
+        # Перевіряємо типи, чи є це списками
+        if not isinstance(log_response, list):
+            logger.error("Log service did not return a list.")
+            log_response = []
+
+        if not isinstance(message_response, str):
+            logger.error("Message service did not return a string.")
+            message_response = ""
+
+        # Об'єднуємо відповіді, якщо це правильні типи
+        all_messages = log_response + [message_response]
+
+        return logging_pb2.GetResponse(messages=all_messages)
+
+    except grpc.RpcError as e:
+        logger.error(f"Error fetching messages: {e}")
+        context.set_code(grpc.StatusCode.UNAVAILABLE)
+        context.set_details("Failed to fetch messages.")
+        return facade_pb2.GetResponse(messages=[])
+
+    
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     facade_pb2_grpc.add_FacadeServiceServicer_to_server(FacadeService(), server)
@@ -132,8 +173,38 @@ def serve():
     logger.info("Facade Service is alive on port 8000")
     server.wait_for_termination()
 
-if __name__ == '__main__':
+app = Flask(__name__)
+@app.route("/write", methods=["POST"])
+def write_message():
+    data = request.get_json()
+    message = data.get("message")
+    if not message:
+        return jsonify({"error": "Missing 'message' field"}), 400
+
+    with grpc.insecure_channel("localhost:8000") as channel:
+        stub = facade_pb2_grpc.FacadeServiceStub(channel)
+        try:
+            response = stub.WriteMessage(facade_pb2.MessageRequest(message=message))
+            return jsonify({"success": response.success, "message": response.message})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+@app.route("/show_messages", methods=["GET"])
+def show_messages():
+    with grpc.insecure_channel("localhost:8000") as channel:
+        stub = facade_pb2_grpc.FacadeServiceStub(channel)
+        try:
+            response = stub.ShowMessages(facade_pb2.ShowRequest())
+            return jsonify({"messages": response.messages}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python facade.py <config_port>")
         sys.exit(1)
-    serve()
+
+    from threading import Thread
+    Thread(target=serve, daemon=True).start()
+
+    app.run(port=8080)

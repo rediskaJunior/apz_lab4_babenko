@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import logging_pb2 as logging__pb2
+import facade_pb2 as facade__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
@@ -36,13 +36,13 @@ class FacadeServiceStub(object):
         """
         self.WriteMessage = channel.unary_unary(
                 '/facade.FacadeService/WriteMessage',
-                request_serializer=logging__pb2.LogRequest.SerializeToString,
-                response_deserializer=logging__pb2.LogResponse.FromString,
+                request_serializer=facade__pb2.WriteRequest.SerializeToString,
+                response_deserializer=facade__pb2.LogResponse.FromString,
                 _registered_method=True)
         self.ShowMessages = channel.unary_unary(
                 '/facade.FacadeService/ShowMessages',
-                request_serializer=logging__pb2.GetRequest.SerializeToString,
-                response_deserializer=logging__pb2.GetResponse.FromString,
+                request_serializer=facade__pb2.ShowRequest.SerializeToString,
+                response_deserializer=facade__pb2.GetResponse.FromString,
                 _registered_method=True)
 
 
@@ -50,15 +50,13 @@ class FacadeServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def WriteMessage(self, request, context):
-        """Use imported LogRequest
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ShowMessages(self, request, context):
-        """Use imported GetRequest
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -68,13 +66,13 @@ def add_FacadeServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'WriteMessage': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteMessage,
-                    request_deserializer=logging__pb2.LogRequest.FromString,
-                    response_serializer=logging__pb2.LogResponse.SerializeToString,
+                    request_deserializer=facade__pb2.WriteRequest.FromString,
+                    response_serializer=facade__pb2.LogResponse.SerializeToString,
             ),
             'ShowMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.ShowMessages,
-                    request_deserializer=logging__pb2.GetRequest.FromString,
-                    response_serializer=logging__pb2.GetResponse.SerializeToString,
+                    request_deserializer=facade__pb2.ShowRequest.FromString,
+                    response_serializer=facade__pb2.GetResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -102,8 +100,8 @@ class FacadeService(object):
             request,
             target,
             '/facade.FacadeService/WriteMessage',
-            logging__pb2.LogRequest.SerializeToString,
-            logging__pb2.LogResponse.FromString,
+            facade__pb2.WriteRequest.SerializeToString,
+            facade__pb2.LogResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -129,8 +127,8 @@ class FacadeService(object):
             request,
             target,
             '/facade.FacadeService/ShowMessages',
-            logging__pb2.GetRequest.SerializeToString,
-            logging__pb2.GetResponse.FromString,
+            facade__pb2.ShowRequest.SerializeToString,
+            facade__pb2.GetResponse.FromString,
             options,
             channel_credentials,
             insecure,

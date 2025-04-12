@@ -35,9 +35,14 @@ class MessageServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetStaticMessage = channel.unary_unary(
-                '/logging.MessageService/GetStaticMessage',
+                '/messages.MessageService/GetStaticMessage',
                 request_serializer=messages__pb2.EmptyRequest.SerializeToString,
                 response_deserializer=messages__pb2.MessageResponse.FromString,
+                _registered_method=True)
+        self.GetAllMessages = channel.unary_unary(
+                '/messages.MessageService/GetAllMessages',
+                request_serializer=messages__pb2.EmptyRequest.SerializeToString,
+                response_deserializer=messages__pb2.MessageList.FromString,
                 _registered_method=True)
 
 
@@ -45,6 +50,12 @@ class MessageServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def GetStaticMessage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetAllMessages(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -58,11 +69,16 @@ def add_MessageServiceServicer_to_server(servicer, server):
                     request_deserializer=messages__pb2.EmptyRequest.FromString,
                     response_serializer=messages__pb2.MessageResponse.SerializeToString,
             ),
+            'GetAllMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAllMessages,
+                    request_deserializer=messages__pb2.EmptyRequest.FromString,
+                    response_serializer=messages__pb2.MessageList.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'logging.MessageService', rpc_method_handlers)
+            'messages.MessageService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('logging.MessageService', rpc_method_handlers)
+    server.add_registered_method_handlers('messages.MessageService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -83,9 +99,36 @@ class MessageService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/logging.MessageService/GetStaticMessage',
+            '/messages.MessageService/GetStaticMessage',
             messages__pb2.EmptyRequest.SerializeToString,
             messages__pb2.MessageResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetAllMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/messages.MessageService/GetAllMessages',
+            messages__pb2.EmptyRequest.SerializeToString,
+            messages__pb2.MessageList.FromString,
             options,
             channel_credentials,
             insecure,

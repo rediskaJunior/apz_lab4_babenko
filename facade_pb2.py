@@ -22,16 +22,25 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-import logging_pb2 as logging__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x66\x61\x63\x61\x64\x65.proto\x12\x06\x66\x61\x63\x61\x64\x65\x1a\rlogging.proto2\x85\x01\n\rFacadeService\x12\x39\n\x0cWriteMessage\x12\x13.logging.LogRequest\x1a\x14.logging.LogResponse\x12\x39\n\x0cShowMessages\x12\x13.logging.GetRequest\x1a\x14.logging.GetResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x66\x61\x63\x61\x64\x65.proto\x12\x06\x66\x61\x63\x61\x64\x65\"\x1f\n\x0cWriteRequest\x12\x0f\n\x07message\x18\x01 \x01(\t\"!\n\x0eMessageRequest\x12\x0f\n\x07message\x18\x01 \x01(\t\"/\n\x0bLogResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\r\n\x0bShowRequest\"\x1f\n\x0bGetResponse\x12\x10\n\x08messages\x18\x01 \x03(\t2\x84\x01\n\rFacadeService\x12\x39\n\x0cWriteMessage\x12\x14.facade.WriteRequest\x1a\x13.facade.LogResponse\x12\x38\n\x0cShowMessages\x12\x13.facade.ShowRequest\x1a\x13.facade.GetResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'facade_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_FACADESERVICE']._serialized_start=40
-  _globals['_FACADESERVICE']._serialized_end=173
+  _globals['_WRITEREQUEST']._serialized_start=24
+  _globals['_WRITEREQUEST']._serialized_end=55
+  _globals['_MESSAGEREQUEST']._serialized_start=57
+  _globals['_MESSAGEREQUEST']._serialized_end=90
+  _globals['_LOGRESPONSE']._serialized_start=92
+  _globals['_LOGRESPONSE']._serialized_end=139
+  _globals['_SHOWREQUEST']._serialized_start=141
+  _globals['_SHOWREQUEST']._serialized_end=154
+  _globals['_GETRESPONSE']._serialized_start=156
+  _globals['_GETRESPONSE']._serialized_end=187
+  _globals['_FACADESERVICE']._serialized_start=190
+  _globals['_FACADESERVICE']._serialized_end=322
 # @@protoc_insertion_point(module_scope)
