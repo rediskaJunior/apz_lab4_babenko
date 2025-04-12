@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package facade;
+
+import "logging.proto";
+
+service FacadeService {
+    rpc WriteMessage (logging.LogRequest) returns (logging.LogResponse);  // Use imported LogRequest
+    rpc ShowMessages (logging.GetRequest) returns (logging.GetResponse);  // Use imported GetRequest
+}

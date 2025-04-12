@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package logging;
+
+service MessageService {
+    rpc GetStaticMessage (EmptyRequest) returns (MessageResponse);
+}
+
+message EmptyRequest {}
+
+message MessageResponse {
+    string message = 1;
+}
